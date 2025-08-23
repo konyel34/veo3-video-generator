@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { type AspectRatio } from '../types';
 
@@ -12,10 +11,15 @@ interface GenerateVideoParams {
   onProgress: (message: string) => void;
 }
 
-const API_KEY = process.env.API_KEY;
+// Fix: Check multiple possible environment variable names
+const API_KEY = import.meta.env.VITE_API_KEY || 
+                import.meta.env.VITE_GEMINI_API_KEY || 
+                import.meta.env.API_KEY || 
+                import.meta.env.GEMINI_API_KEY;
 
 if (!API_KEY) {
-  throw new Error("API_KEY environment variable not set.");
+  console.error('Available environment variables:', import.meta.env);
+  throw new Error("API_KEY environment variable not set. Please set VITE_API_KEY or VITE_GEMINI_API_KEY in Vercel environment variables.");
 }
 
 const ai = new GoogleGenAI({ apiKey: API_KEY });
