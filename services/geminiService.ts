@@ -11,11 +11,22 @@ interface GenerateVideoParams {
   onProgress: (message: string) => void;
 }
 
+// DEBUG: Log all environment variables with details
+console.log('=== ENVIRONMENT VARIABLES DEBUG ===');
+console.log('import.meta.env:', import.meta.env);
+console.log('VITE_API_KEY:', import.meta.env.VITE_API_KEY);
+console.log('VITE_GEMINI_API_KEY:', import.meta.env.VITE_GEMINI_API_KEY);
+console.log('API_KEY:', import.meta.env.API_KEY);
+console.log('GEMINI_API_KEY:', import.meta.env.GEMINI_API_KEY);
+console.log('All keys in import.meta.env:', Object.keys(import.meta.env));
+
 // Fix: Check multiple possible environment variable names
 const API_KEY = import.meta.env.VITE_API_KEY || 
                 import.meta.env.VITE_GEMINI_API_KEY || 
                 import.meta.env.API_KEY || 
                 import.meta.env.GEMINI_API_KEY;
+
+console.log('Final API_KEY value:', API_KEY ? 'Found (hidden for security)' : 'NOT FOUND');
 
 if (!API_KEY) {
   console.error('Available environment variables:', import.meta.env);
