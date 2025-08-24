@@ -7,6 +7,7 @@ import ImageUploader from './components/ImageUploader';
 import SettingsPanel from './components/SettingsPanel';
 import VideoPlayer from './components/VideoPlayer';
 import Loader from './components/Loader';
+import Footer from './components/Footer';
 
 const App: React.FC = () => {
   const [prompt, setPrompt] = useState<string>('');
@@ -16,6 +17,7 @@ const App: React.FC = () => {
   const [loadingMessage, setLoadingMessage] = useState<string>('');
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [userApiKey, setUserApiKey] = useState<string>(''); // <-- STATE BARU UNTUK API KEY PENGGUNA
 
   useEffect(() => {
     if (isLoading) {
@@ -39,6 +41,7 @@ const App: React.FC = () => {
     try {
       const generatedUrl = await generateVideo({
         prompt,
+        userApiKey, // <-- KIRIM API KEY PENGGUNA KE FUNGSI GENERATE
         image: image ? { base64Data: image.base64Data, mimeType: image.mimeType } : undefined,
         aspectRatio,
         onProgress: setLoadingMessage,
@@ -50,7 +53,7 @@ const App: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [prompt, image, aspectRatio, isLoading]);
+  }, [prompt, image, aspectRatio, isLoading, userApiKey]); // <-- TAMBAHKAN userApiKey DI SINI
   
   const isGenerateDisabled = !prompt.trim() || isLoading;
 
@@ -61,6 +64,23 @@ const App: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Input and Settings Column */}
           <div className="flex flex-col gap-6">
+
+            {/* 👇 BAGIAN BARU UNTUK INPUT API KEY 👇 */}
+            <div className="bg-base-200 rounded-xl p-6 shadow-lg">
+              <h2 className="text-xl font-bold mb-2 text-content-100">Your Google AI API Key</h2>
+              <p className="text-sm text-content-200 mb-4">
+                Paste your key here to use your own quota. Your key is only used in your browser.
+              </p>
+              <input
+                type="password"
+                value={userApiKey}
+                onChange={(e) => setUserApiKey(e.target.value)}
+                placeholder="Enter your API Key here"
+                className="w-full p-4 bg-base-300 border-2 border-base-300 rounded-lg focus:ring-2 focus:ring-brand-primary focus:border-brand-primary transition duration-200"
+                disabled={isLoading}
+              />
+            </div>
+
             <div className="bg-base-200 rounded-xl p-6 shadow-lg">
               <h2 className="text-xl font-bold mb-4 text-content-100">1. Describe your video</h2>
               <textarea
@@ -93,17 +113,6 @@ const App: React.FC = () => {
             >
               {isLoading ? 'Generating...' : 'Generate Video'}
             </button>
-            
-            {/* 👇 KODE BARU UNTUK TOMBOL DONASI ADA DI SINI 👇 */}
-            <a
-              href="https://saweria.co/aiakademi"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="w-full text-center mt-4 py-4 px-6 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-3 bg-green-500 text-white hover:bg-green-600 hover:shadow-xl hover:scale-105 transform"
-            >
-              Support via Saweria 💸
-            </a>
-
           </div>
 
           {/* Output Column */}
@@ -127,6 +136,9 @@ const App: React.FC = () => {
           </div>
         </div>
       </main>
+      
+      <Footer />
+
     </div>
   );
 };

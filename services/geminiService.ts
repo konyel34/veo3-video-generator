@@ -1,8 +1,12 @@
 import { GoogleGenAI } from "@google/genai";
 import { type AspectRatio } from '../types';
 
+// Ini jadi API Key cadangan/default dari Vercel
+const DEFAULT_API_KEY = import.meta.env.VITE_API_KEY;
+
 interface GenerateVideoParams {
   prompt: string;
+  userApiKey?: string; // Kita tambahkan parameter ini
   image?: {
     base64Data: string;
     mimeType: string;
@@ -11,35 +15,20 @@ interface GenerateVideoParams {
   onProgress: (message: string) => void;
 }
 
-// DEBUG: Log all environment variables with details
-console.log('=== ENVIRONMENT VARIABLES DEBUG ===');
-console.log('import.meta.env:', import.meta.env);
-console.log('VITE_API_KEY:', import.meta.env.VITE_API_KEY);
-console.log('VITE_GEMINI_API_KEY:', import.meta.env.VITE_GEMINI_API_KEY);
-console.log('API_KEY:', import.meta.env.API_KEY);
-console.log('GEMINI_API_KEY:', import.meta.env.GEMINI_API_KEY);
-console.log('All keys in import.meta.env:', Object.keys(import.meta.env));
-
-// Fix: Check multiple possible environment variable names
-const API_KEY = import.meta.env.VITE_API_KEY || 
-                import.meta.env.VITE_GEMINI_API_KEY || 
-                import.meta.env.API_KEY || 
-                import.meta.env.GEMINI_API_KEY;
-
-console.log('Final API_KEY value:', API_KEY ? 'Found (hidden for security)' : 'NOT FOUND');
-
-if (!API_KEY) {
-  console.error('Available environment variables:', import.meta.env);
-  throw new Error("API_KEY environment variable not set. Please set VITE_API_KEY or VITE_GEMINI_API_KEY in Vercel environment variables.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
-
 async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-export const generateVideo = async ({ prompt, image, aspectRatio, onProgress }: GenerateVideoParams): Promise<string> => {
+export const generateVideo = async ({ prompt, userApiKey, image, aspectRatio, onProgress }: GenerateVideoParams): Promise<string> => {
+  
+  const apiKeyToUse = userApiKey || DEFAULT_API_KEY;
+
+  if (!apiKeyToUse) {
+    throw new Error("API Key not provided. Please provide your own API Key in the input field, or the app owner needs to set a default key.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: apiKeyToUse });
+
   onProgress("Starting video generation process...");
 
   const generateVideosParams: any = {
@@ -47,8 +36,6 @@ export const generateVideo = async ({ prompt, image, aspectRatio, onProgress }: 
       prompt,
       config: {
         numberOfVideos: 1,
-        // The VEO API currently does not support aspect ratio, but we include it for future compatibility
-        // aspectRatio: aspectRatio,
       }
   };
   
@@ -87,7 +74,8 @@ export const generateVideo = async ({ prompt, image, aspectRatio, onProgress }: 
   }
 
   onProgress("Downloading generated video...");
-  const response = await fetch(`${downloadLink}&key=${API_KEY}`);
+  // Perhatikan: kita pakai API Key lagi untuk download
+  const response = await fetch(`${downloadLink}&key=${apiKeyToUse}`);
 
   if (!response.ok) {
     throw new Error(`Failed to download the video. Status: ${response.statusText}`);
