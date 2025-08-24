@@ -93,6 +93,17 @@ const App: React.FC = () => {
             >
               {isLoading ? 'Generating...' : 'Generate Video'}
             </button>
+            
+            {/* 👇 KODE BARU UNTUK TOMBOL DONASI ADA DI SINI 👇 */}
+            <a
+              href="https://saweria.co/aiakademi"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full text-center mt-4 py-4 px-6 text-lg font-bold rounded-lg transition-all duration-300 flex items-center justify-center gap-3 bg-green-500 text-white hover:bg-green-600 hover:shadow-xl hover:scale-105 transform"
+            >
+              Support via Saweria 💸
+            </a>
+
           </div>
 
           {/* Output Column */}
